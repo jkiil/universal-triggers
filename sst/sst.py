@@ -88,11 +88,14 @@ def main():
                                                   num_layers=2,
                                                   batch_first=True))
     model = LstmClassifier(word_embeddings, encoder, vocab)
-    model.cuda()
+    # model.cuda()
 
     # where to save the model
-    model_path = "/tmp/" + EMBEDDING_TYPE + "_" + "model.th"
-    vocab_path = "/tmp/" + EMBEDDING_TYPE + "_" + "vocab"
+    # model_path = "/tmp/" + EMBEDDING_TYPE + "_" + "model.th"
+    # vocab_path = "/tmp/" + EMBEDDING_TYPE + "_" + "vocab"
+    model_path = EMBEDDING_TYPE + "_" + "model.th"
+    vocab_path = EMBEDDING_TYPE + "_" + "vocab"
+
     # if the model already exists (its been trained), load the pre-trained weights and vocabulary
     if os.path.isfile(model_path):
         vocab = Vocabulary.from_files(vocab_path)
@@ -110,13 +113,14 @@ def main():
                           train_dataset=train_data,
                           validation_dataset=dev_data,
                           num_epochs=5,
-                          patience=1,
-                          cuda_device=0)
+                          patience=1)
+                          #cuda_device=0)
         trainer.train()
         with open(model_path, 'wb') as f:
             torch.save(model.state_dict(), f)
         vocab.save_to_files(vocab_path)
-    model.train().cuda() # rnn cannot do backwards in train mode
+    model.train()
+    # model.train().cuda() # rnn cannot do backwards in train mode
 
     # Register a gradient hook on the embeddings. This saves the gradient w.r.t. the word embeddings.
     # We use the gradient later in the attack.
